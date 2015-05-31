@@ -97,11 +97,11 @@ function sendButtonClick(){
     return;
   storeMessages(newMessage);
   message.value = '';
-  location.reload();
 }
 
 function storeMessages(sendMessage, continueWith) {
      post(appState.mainUrl, JSON.stringify(sendMessage), function () {
+       rrestore();
     });
 }
 
@@ -145,7 +145,6 @@ function saveRow() {
   var item = theChangeMessage(tr11, message.value, messList[indexEditRow-1].id);
   changeMessages(item);
   sleep(100);
-  location.reload();
 }
 
 function deleteRow(obj) {
