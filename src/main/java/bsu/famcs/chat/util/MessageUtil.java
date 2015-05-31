@@ -1,6 +1,7 @@
 package bsu.famcs.chat.util;
 
 import bsu.famcs.chat.model.Message;
+import bsu.famcs.chat.model.MessageStorage;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -47,8 +48,18 @@ public final class MessageUtil {
         String msgText = ((String)json.get(MESSAGE)).trim();
         String id = ((String)json.get(ID));
         if (userName != null && msgText != null) {
-            Message msg =  new Message(userName, msgText, id, generateCurrentDate());
+            Message msg =  new Message(userName, msgText, id, generateCurrentDate(), MessageStorage.getSize(), false);
             return msg;
+        }
+        return null;
+    }
+
+    public static Message jsonToCurrentMessage(JSONObject json) {
+        String userName = (String)json.get(NAME);
+        String msgText = ((String)json.get(MESSAGE));
+        String id = (String)json.get(ID);
+        if (id != null) {
+            return new Message(userName, msgText, id, generateCurrentDate(), MessageStorage.getSize(), false);
         }
         return null;
     }

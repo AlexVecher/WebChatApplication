@@ -76,6 +76,9 @@ public final class XMLHistoryUtil {
         sendDateElement.appendChild(document.createTextNode(message.getDate()));
         messageElement.appendChild(sendDateElement);
 
+        Element delElement = document.createElement("isDeleted");
+        delElement.appendChild(document.createTextNode(message.getDel()));
+        messageElement.appendChild(delElement);
 
         Transformer transformer = getTransformer();
         DOMSource source = new DOMSource(document);
@@ -98,7 +101,7 @@ public final class XMLHistoryUtil {
             String userName = messageElement.getElementsByTagName(NAME).item(0).getTextContent().trim();
             String msgText = messageElement.getElementsByTagName("text").item(0).getTextContent().trim();
             String sendDate = messageElement.getElementsByTagName(DATE).item(0).getTextContent().trim();
-            messages.add(new Message(userName, msgText, id, sendDate));
+            messages.add(new Message(userName, msgText, id, sendDate, 0, false));
         }
         return messages;
     }
@@ -111,7 +114,7 @@ public final class XMLHistoryUtil {
         Node update = getNodeById(document, message.getId());
         String userName = null;
         String sendDate = null;
-        if(update!=null) {
+        if(update != null) {
             NodeList nodeList = update.getChildNodes();
             for (int i = nodeList.getLength() - 1; i >= 0; i--) {
                 Node node = nodeList.item(i);
@@ -126,16 +129,15 @@ public final class XMLHistoryUtil {
                     sendDate = node.getTextContent();
                 }
             }
-
             Transformer transformer = getTransformer();
             DOMSource source = new DOMSource(document);
-            StreamResult result = new StreamResult(XML_LOCATION);
+            StreamResult result = new StreamResult(new File(XML_LOCATION));
             transformer.transform(source, result);
         }
         else {
             throw new NullPointerException();
         }
-        return new Message(userName, message.getMsgText(), message.getId(), message.getDate());
+        return new Message(userName, message.getMsgText(),message.getId(), sendDate, 0, true);
     }
 
     private static Node getNodeById(Document document, String id) throws XPathExpressionException {

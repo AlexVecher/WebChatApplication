@@ -32,15 +32,15 @@ var account = function(textName, done) {
 var appState = {
   mainUrl : 'chat',
   messList:[],
-  token : 'TE0EN'
+  token : 'TE11EN'
 };
 
 var accountInfo = [];
 
 function run(){
-	var appContainer = document.getElementsByClassName('chat')[0];
-	appContainer.addEventListener('click', delegateEvent);
-  rrestore();
+  var appContainer = document.getElementsByClassName('chat')[0];
+  appContainer.addEventListener('click', delegateEvent);
+  updateMessages();
   var accInfo = restore("acc");
   if (accInfo != null) {
   createAccountInfo(accInfo);
@@ -101,7 +101,6 @@ function sendButtonClick(){
 
 function storeMessages(sendMessage, continueWith) {
      post(appState.mainUrl, JSON.stringify(sendMessage), function () {
-       rrestore();
     });
 }
 
@@ -150,23 +149,25 @@ function saveRow() {
 function deleteRow(obj) {
   var messList = appState.messList;
   var index = obj.parentNode.parentNode.rowIndex;
-  deleteMessage(index - 1);
-  var table = document.getElementById("table2");
-  table.deleteRow(index);
-  messList.splice(index - 1, 1);
+  var m = theChangeMessage(messList[index-1].name, messList[index-1].message, messList[index-1].id);
+  deleteMessage(messList[index-1].id, m,
+      function(){
+      });
+  messList[index - 1].message = "Deleted";
+  var table = document.getElementById('table2');
+  obj.parentNode.parentNode.cells[3].innerHTML = "Deleted";
 }
 
-function deleteMessage(index, continueWith) {
-  var indexToken = index*8+11; 
+function deleteMessage(index, msg, continueWith) {
+  var indexToken = index * 8 + 11;
   var url = appState.mainUrl + '?token=' + "TN" +indexToken.toString() + "EN";
-  del(url, function () {
-    continueWith && continueWith();
+  del(url, JSON.stringify(msg), function () {
+    updateMessages();
   });
 }
 
 function changeMessages(changeMessage, continueWith) {
     put(appState.mainUrl, JSON.stringify(changeMessage), function () {
-        rrestore();
     });
 }
 
@@ -178,9 +179,7 @@ function rrestore(continueWith) {
 
     var response = JSON.parse(responseText);
 
-    appState.token = response.token;
     createAllMessages(response.messages);
-    output(appState);
 
     continueWith && continueWith();
   });
@@ -267,6 +266,26 @@ function editRow(obj) {
   var editText = obj.parentNode.parentNode.cells[3].innerHTML;
 }
 
+function updateMessages(continueWith) {
+  var url = appState.mainUrl + '?token=' + appState.token;
+  var table = document.getElementById('table2');
+  var ind = table.rows.length - 1;
+  get(url, function (responseText) {
+    console.assert(responseText != null);
+    var response = JSON.parse(responseText).messages;
+    for (var i = 0; i < response.length; i++) {
+      var message = response[i];
+      if(parseInt(message.countMess) >= ind)
+      {
+        addOldMessage(message);
+      }
+    }
+    continueWith && continueWith();
+  });
+  setTimeout(updateMessages, 1000);
+
+}
+
 function post(url, data, continueWith, continueWithError) {
   ajax('POST', url, data, continueWith, continueWithError); 
 }
@@ -275,9 +294,9 @@ function get(url, continueWith, continueWithError) {
   ajax('GET', url, null, continueWith, continueWithError);
 }
 
-function del(url, continueWith, continueWithError) {
-  ajax('DELETE', url, null, continueWith, continueWithError);
-}
+function del(url, data, continueWith, continueWithError) {
+  ajax('DELETE', url, data, continueWith, continueWithError);
+};
 
 function put(url, data, continueWith, continueWithError) {
     ajax('PUT', url, data, continueWith, continueWithError);
@@ -343,10 +362,4 @@ function ajax(method, url, data, continueWith, continueWithError) {
 function show(state){
   document.getElementById('block').style.display = state;  
   document.getElementById('whitewindow1').style.display = state;    
-}
-
-function output(value){
-  var output = document.getElementById('output');
-
-  output.innerText = JSON.stringify(value, null, 2);
 }

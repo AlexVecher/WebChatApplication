@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -54,6 +55,11 @@ public class MessageServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_MODIFIED);
             } else {
                 String messages = serverResponse(0);
+                try {
+                    JSONObject json = stringToJson(messages);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 response.setContentType(APPLICATION_JSON);
                 PrintWriter out = response.getWriter();
                 out.print(messages);
@@ -75,10 +81,9 @@ public class MessageServlet extends HttpServlet {
             Message message = jsonToMessage(json);
             System.out.println(message.getUserMessage() );
             logger.info(message.getUserMessage());
-           XMLHistoryUtil.addMessage(message);
+            XMLHistoryUtil.addMessage(message);
             MessageStorage.addMessagePost(message);
             isModifiedStorage++;
-            //System.out.println(MessageStorage.getSize());
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (ParseException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -92,6 +97,40 @@ public class MessageServlet extends HttpServlet {
         } catch (ParserConfigurationException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             logger.error("Invalid message4");
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        logger.info("Delete request");
+        String data = getMessageBody(request);
+        logger.info("Request data : " + data);
+        Message message;
+        try {
+            JSONObject json = stringToJson(data);
+            message = jsonToCurrentMessage(json);
+            message.isDelete();
+            Message updated = XMLHistoryUtil.updateMessage(message);
+            MessageStorage.addMessageDelete(updated);
+            isModifiedStorage++;
+        } catch (XPathExpressionException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            logger.error("Invalid message");
+        } catch (ParseException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            logger.error("Invalid message");
+        } catch (TransformerException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            logger.error("Invalid message");
+        } catch (SAXException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            logger.error("Invalid message");
+        } catch (ParserConfigurationException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            logger.error("Invalid message");
+        } catch (NullPointerException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            logger.error("Invalid message");
         }
     }
 

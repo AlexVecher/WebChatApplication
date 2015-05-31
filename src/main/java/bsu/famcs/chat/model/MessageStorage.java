@@ -18,8 +18,8 @@ public final class MessageStorage {
         HISTORY.add(message);
     }
     public static void addMessageDelete(Message message) {
-        for(int i=0; i < HISTORY.size(); i++){
-            if(Integer.parseInt(HISTORY.get(i).getId()) == Integer.parseInt(message.getId())){
+        for(int i = 0; i < HISTORY.size(); i++){
+            if(HISTORY.get(i).getId().equals(message.getId())){
                 HISTORY.get(i).setMsgText(message.getMsgText());
             }
         }
@@ -60,5 +60,9 @@ public final class MessageStorage {
             sb.append('\n');
         }
         return sb.toString().trim();
+    }
+
+    public static void delS(int index) {
+        HISTORY.remove(index);
     }
 }
