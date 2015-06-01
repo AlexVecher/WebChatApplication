@@ -30,8 +30,6 @@ public class Message {
         message = "Deleted";
     }
 
-
-
     public String getDel() {
         if(isDeleted) return "true";
         return "false";
@@ -60,6 +58,7 @@ public class Message {
                 .append("\", \"message\":\"").append(message)
                 .append("\", \"id\":\"").append(id)
                 .append("\", \"countMess\":\"").append(countMess)
+                .append("\", \"isDeleted\":\"").append(isDeleted)
                 .append("\"}");
         return sb.toString();
     }
@@ -69,8 +68,7 @@ public class Message {
         sb.append(' ')
                 .append(name)
                 .append(" : ")
-                .append(message)
-                .append(countMess);
+                .append(message);
         return sb.toString();
     }
 }

@@ -134,6 +134,42 @@ public class MessageServlet extends HttpServlet {
         }
     }
 
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        logger.info("Put request");
+        String data = getMessageBody(request);
+        logger.info("Request data : " + data);
+        Message message = null;
+        try {
+            JSONObject jsonObject = stringToJson(data);
+            message = jsonToCurrentMessage(jsonObject);
+            if (message.getDel().equals("false")) {
+                Message updated = XMLHistoryUtil.updateMessage(message);
+                MessageStorage.addMessagePut(updated);
+                isModifiedStorage++;
+            }
+        } catch (XPathExpressionException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            logger.error("Invalid message");
+        } catch (ParseException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            logger.error("Invalid message");
+        } catch (TransformerException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            logger.error("Invalid message");
+        } catch (SAXException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            logger.error("Invalid message");
+        } catch (ParserConfigurationException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            logger.error("Invalid message");
+        } catch (NullPointerException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            logger.error("Invalid message");
+        }
+    }
+
+
     @SuppressWarnings("unchecked")
     private String serverResponse(int index) {
         JSONObject jsonObject = new JSONObject();

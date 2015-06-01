@@ -142,7 +142,7 @@ function saveRow() {
   var tr11 = document.getElementById('td1_1').innerHTML;
   var messList = appState.messList;
   var item = theChangeMessage(tr11, message.value, messList[indexEditRow-1].id);
-  changeMessages(item);
+  changeMessages(item.id, item);
   sleep(100);
 }
 
@@ -154,6 +154,7 @@ function deleteRow(obj) {
       function(){
       });
   messList[index - 1].message = "Deleted";
+  messList[index - 1].isDeleted = "true";
   var table = document.getElementById('table2');
   obj.parentNode.parentNode.cells[3].innerHTML = "Deleted";
 }
@@ -166,9 +167,12 @@ function deleteMessage(index, msg, continueWith) {
   });
 }
 
-function changeMessages(changeMessage, continueWith) {
-    put(appState.mainUrl, JSON.stringify(changeMessage), function () {
-    });
+function changeMessages(index, changeMessage, continueWith) {
+  var indexToken = index * 8 + 11;
+  var url = appState.mainUrl + '?token=' + "TN" + indexToken + "EN";
+  put(url, JSON.stringify(changeMessage), function () {
+    updateMessages();
+  });
 }
 
 function rrestore(continueWith) {
@@ -259,10 +263,12 @@ function store(listToSave, str) {
 
 var indexEditRow = 0;
 function editRow(obj) {
+  var messList = appState.messList;
+  indexEditRow = obj.parentNode.parentNode.rowIndex;
+  if (messList[indexEditRow - 1] == "true") return;
   document.getElementById('whitewindow3').style.display = 'block';
   document.getElementById('block').style.display = 'block';
   document.getElementById('editMessage').innerHTML = obj.parentNode.parentNode.cells[3].innerHTML.replace(/<br>/gi, '\n');
-  indexEditRow = obj.parentNode.parentNode.rowIndex;
   var editText = obj.parentNode.parentNode.cells[3].innerHTML;
 }
 

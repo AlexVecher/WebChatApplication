@@ -25,8 +25,8 @@ public final class MessageStorage {
         }
     }
     public static void addMessagePut(Message message) {
-        for(int i=0; i < HISTORY.size(); i++){
-            if(Integer.parseInt(HISTORY.get(i).getId()) == Integer.parseInt(message.getId())){
+        for(int i = 0; i < HISTORY.size(); i++){
+            if(HISTORY.get(i).getId().equals(message.getId())){
                 HISTORY.get(i).setMsgText(message.getMsgText());
             }
         }

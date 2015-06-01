@@ -101,7 +101,11 @@ public final class XMLHistoryUtil {
             String userName = messageElement.getElementsByTagName(NAME).item(0).getTextContent().trim();
             String msgText = messageElement.getElementsByTagName("text").item(0).getTextContent().trim();
             String sendDate = messageElement.getElementsByTagName(DATE).item(0).getTextContent().trim();
-            messages.add(new Message(userName, msgText, id, sendDate, 0, false));
+            String del = messageElement.getElementsByTagName("isDeleted").item(0).getTextContent().trim();
+            boolean d;
+            if (del.equals("false")) d = false;
+            else d = true;
+            messages.add(new Message(userName, msgText, id, sendDate, 0, d));
         }
         return messages;
     }
@@ -118,12 +122,14 @@ public final class XMLHistoryUtil {
             NodeList nodeList = update.getChildNodes();
             for (int i = nodeList.getLength() - 1; i >= 0; i--) {
                 Node node = nodeList.item(i);
-
                 if (NAME.equals(node.getNodeName())) {
                     userName = node.getTextContent();
                 }
-                if (MESSAGE.equals(node.getNodeName())) {
+                if ("text".equals(node.getNodeName())) {
                     node.setTextContent(message.getMsgText());
+                }
+                if ("isDeleted".equals(node.getNodeName())) {
+                    node.setTextContent(message.getDel());
                 }
                 if (DATE.equals(node.getNodeName())) {
                     sendDate = node.getTextContent();
@@ -131,7 +137,7 @@ public final class XMLHistoryUtil {
             }
             Transformer transformer = getTransformer();
             DOMSource source = new DOMSource(document);
-            StreamResult result = new StreamResult(new File(XML_LOCATION));
+            StreamResult result = new StreamResult(XML_LOCATION);
             transformer.transform(source, result);
         }
         else {
